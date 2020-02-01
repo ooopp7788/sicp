@@ -2,6 +2,7 @@
 ;; 表达式求值
 (define (eval exp env)
   (cond
+    ; 特殊情况: 关键字、基本类型
     ;; 自求值表达式: 值
     ((self-evaluating? exp) exp)
     ;; 变量
@@ -20,6 +21,9 @@
     ((begin? exp) (eval-sequence (begin-actions exp) env))
     ;; cond 条件语句
     ((cond? exp) (eval (cond->if exp) env))
+    ; 一般情况，(proc args)
+    ; 先 (eval proc env) 和 (list-of-values args env)
+    ; 然后 (apply proc args)
     ;; 过程应用
     ((application? exp) (apply (eval (operator exp) env) (list-of-values (operands exp) env)))
     (else (error "Unknown expression type -- EVAL" exp))))
@@ -40,6 +44,9 @@
            (procedure-environment procedure))))
         (else
          (error "Unknown procedure type -- APPLY" procedure))))
+
+
+; 抽象过程
 ;; 过程参数 顺序求值
 (define (list-of-values exps env)
   (if (no-operands? exps)
